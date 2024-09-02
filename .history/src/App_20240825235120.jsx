@@ -1,0 +1,23 @@
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/home/HomePage";
+import SingleSpeedPage from "./pages/Single Speed/SingleSpeedPage";
+import CityBikesPage from "./pages/city Bikes/CityBikesPage"
+const App = () => {
+  return (
+    <Router>
+      <div>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/HomePage" element={<HomePage />} />
+          <Route path="/SingleSpeedPage" element={<SingleSpeedPage />} />
+          
+
+
+        </Routes>
+      </div>
+    </Router>
+  );
+};
+
+export default App;
