@@ -5,11 +5,13 @@ import PureFixMicroOriginalSeriesImage from '../../assets/Products-Images/PureFi
 const PureFixMicroOriginalSeries = () => {
   return (
     <ProductCard
+      id={28}
       image={PureFixMicroOriginalSeriesImage}
       altText="Pure Fix Micro Original Series"
       name="Pure Fix Micro Original Series"
       brand="PURE CYCLES"
       price="$599.99"
+      type="Bikes"
     />
   );
 };

@@ -1,10 +1,13 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-const ProductCard = ({ image, altText, name, brand, price, oldPrice, isSoldOut, colors }) => {
+const ProductCard = ({ id, image, altText, name, brand, price, oldPrice, isSoldOut, colors }) => {
   return (
     <div className="text-center">
-      <img src={image} alt={altText} className="w-full max-w-xs mx-auto mb-4" />
-      <h3 className="text-xl font-semibold">{name}</h3>
+      <Link to={`/product/${id}`}>
+        <img src={image} alt={altText} className="w-full max-w-xs mx-auto mb-4" />
+        <h3 className="text-xl font-semibold">{name}</h3>
+      </Link>
       {brand && <p className="text-gray-600">{brand}</p>}
       {isSoldOut ? (
         <p className="text-gray-400">Sold Out</p>
