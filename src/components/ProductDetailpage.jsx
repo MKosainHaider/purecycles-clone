@@ -1,11 +1,36 @@
-// src/components/ProductDetailPage.jsx
-import React, { useState } from "react";
-import styled from "styled-components";
-import NavBar from "./NavBar";
-import Footer from "./Footer";
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import NavBar from './NavBar';
+import Footer from './Footer';
+import { useNavigate } from 'react-router-dom';
 
 const ProductDetailPage = ({ product }) => {
-  const [selectedColor, setSelectedColor] = useState(product.colors ? product.colors[0] : "");
+  const [selectedColor, setSelectedColor] = useState(product.colors ? product.colors[0] : '');
+  const navigate = useNavigate();
+
+  const addToCart = () => {
+    const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+    const existingItemIndex = cartItems.findIndex(
+      (item) => item.id === product.id && item.selectedColor === selectedColor
+    );
+
+    if (existingItemIndex !== -1) {
+      cartItems[existingItemIndex].quantity = (cartItems[existingItemIndex].quantity || 1) + 1;
+    } else {
+      const newItem = { ...product, selectedColor, quantity: 1 };
+      cartItems.push(newItem);
+    }
+
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    window.dispatchEvent(new Event('storage'));
+  };
+
+  const buyNow = () => {
+    const productToBuy = { ...product, selectedColor, quantity: 1 };
+    navigate('/buy-now', { state: { product: productToBuy } });
+  };
+
+  if (!product) return <div>Loading...</div>;
 
   return (
     <>
@@ -33,15 +58,26 @@ const ProductDetailPage = ({ product }) => {
             <NewPrice>{product.price}</NewPrice>
             {product.oldPrice && (
               <Discount>
-                Save {Math.round(((parseFloat(product.oldPrice.replace('$', '')) - parseFloat(product.price.replace('$', ''))) / parseFloat(product.oldPrice.replace('$', ''))) * 100)}%
+                Save{" "}
+                {Math.round(
+                  ((parseFloat(product.oldPrice.replace("$", "")) -
+                    parseFloat(product.price.replace("$", ""))) /
+                    parseFloat(product.oldPrice.replace("$", ""))) *
+                    100
+                )}
+                %
               </Discount>
             )}
           </Price>
           <p>{product.description}</p>
-          <Availability>{product.isSoldOut ? "Out of stock" : "In stock, ready to ship"}</Availability>
+          <Availability>
+            {product.isSoldOut ? "Out of stock" : "In stock, ready to ship"}
+          </Availability>
           <ActionButtons>
-            <AddToCartButton disabled={product.isSoldOut}>Add to Cart</AddToCartButton>
-            <BuyNowButton>Buy Now</BuyNowButton>
+            <AddToCartButton disabled={product.isSoldOut} onClick={addToCart}>
+              Add to Cart
+            </AddToCartButton>
+            <BuyNowButton onClick={buyNow}>Buy Now</BuyNowButton>
           </ActionButtons>
         </DetailsSection>
       </Container>
@@ -79,7 +115,7 @@ const ColorSwatch = styled.div`
   width: 30px;
   height: 30px;
   background-color: ${({ color }) => color};
-  border: ${({ selected }) => (selected ? "2px solid black" : "1px solid gray")};
+  border: ${({ selected }) => (selected ? '2px solid black' : '1px solid gray')};
   border-radius: 50%;
   cursor: pointer;
 `;
@@ -122,11 +158,11 @@ const ActionButtons = styled.div`
 `;
 
 const AddToCartButton = styled.button`
-  background-color: ${({ disabled }) => (disabled ? "#ccc" : "black")};
+  background-color: ${({ disabled }) => (disabled ? '#ccc' : 'black')};
   color: white;
   padding: 10px 20px;
   font-size: 1rem;
-  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
   border: none;
   border-radius: 5px;
 `;

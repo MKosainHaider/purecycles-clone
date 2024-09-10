@@ -1,43 +1,124 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-import AdventureAL from "../../components/Products/AdventureAL"; 
-import CityStep3Speed from "../../components/Products/CityStepThrough3Speed"; 
-import Coaster from "../../components/Products/Coaster";
-import UrbanCommuterBike from "../../components/Products/UrbanCommuterBike"; 
-import CityClassic3speed from "../../components/Products/CityClassic3Speed";
-import CityClassic8speed from "../../components/Products/CityClassic8Speed";
-import CityStepThrough8Speed from "../../components/Products/CityStepThrough8Speed";
-import PureCycleOriginal from "../../components/Products/PureCyclesOriginal";
-import CityStepThrough263Speed from "../../components/Products/CityStepThrough26_3Speed";
-import CityStepThrough268Speed from "../../components/Products/CityStepThrough26_8Speed";
-
+import bikeData from "../../api/bike.json"; // Assuming you have the updated JSON file for bikes
+import ProductCard from "../../components/ProductCard2";
 
 const BikesSection = () => {
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedSpeed, setSelectedSpeed] = useState("All");
+  const [sortOption, setSortOption] = useState("Featured");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Extract unique categories and speeds from data
+  const uniqueCategories = ["All", ...new Set(bikeData.map((product) => product.categories).flat())];
+  const uniqueSpeeds = ["All", ...new Set(bikeData.map((product) => product.speed))];
+
+  const handleCategoryChange = (event) => {
+    setSelectedCategory(event.target.value);
+    setIsDropdownOpen(false); // Close dropdown after selection
+  };
+
+  const handleSpeedChange = (event) => {
+    setSelectedSpeed(event.target.value);
+    setIsDropdownOpen(false); // Close dropdown after selection
+  };
+
+  const handleSortChange = (event) => {
+    setSortOption(event.target.value);
+    setIsDropdownOpen(false); // Close dropdown after selection
+  };
+
+  const handleFilterButtonClick = () => {
+    setIsDropdownOpen(!isDropdownOpen); // Toggle dropdown visibility
+  };
+
+  const handleDropdownClose = () => {
+    setIsDropdownOpen(false); // Close dropdown without applying any selection
+  };
+
+  // Sorting function based on selected sort option
+  const sortData = (data, option) => {
+    switch (option) {
+      case "Price, low to high":
+        return [...data].sort((a, b) => parseFloat(a.price.slice(1)) - parseFloat(b.price.slice(1)));
+      case "Price, high to low":
+        return [...data].sort((a, b) => parseFloat(b.price.slice(1)) - parseFloat(a.price.slice(1)));
+      case "A to Z":
+        return [...data].sort((a, b) => a.name.localeCompare(b.name));
+      case "Z to A":
+        return [...data].sort((a, b) => b.name.localeCompare(a.name));
+      case "Newest arrivals":
+        return [...data].sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+      case "Featured":
+      default:
+        return data;
+    }
+  };
+
+  // Filter data based on selected category and speed
+  const filteredData = bikeData.filter((product) => {
+    const matchesCategory = selectedCategory === "All" || product.categories.includes(selectedCategory);
+    const matchesSpeed = selectedSpeed === "All" || product.speed === selectedSpeed;
+    return matchesCategory && matchesSpeed;
+  });
+
+  // Apply sorting to filtered data
+  const sortedData = sortData(filteredData, sortOption);
+
   return (
     <SectionWrapper>
       <FilterSortWrapper>
-        <FilterButton>
+        <FilterButton onClick={handleFilterButtonClick}>
           <i className="fas fa-filter"></i> Filter
+          {isDropdownOpen && (
+            <DropdownMenu onBlur={handleDropdownClose}>
+              <DropdownItem>
+                <label>
+                  Category:
+                  <SelectFilter value={selectedCategory} onChange={handleCategoryChange}>
+                    {uniqueCategories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </SelectFilter>
+                </label>
+              </DropdownItem>
+              <DropdownItem>
+                <label>
+                  Speed:
+                  <SelectFilter value={selectedSpeed} onChange={handleSpeedChange}>
+                    {uniqueSpeeds.map((speed) => (
+                      <option key={speed} value={speed}>
+                        {speed}
+                      </option>
+                    ))}
+                  </SelectFilter>
+                </label>
+              </DropdownItem>
+            </DropdownMenu>
+          )}
         </FilterButton>
-        <SortSelect>
-          <option>Featured</option>
-          <option>Price, low to high</option>
-          <option>Price, high to low</option>
-          <option>Newest arrivals</option>
-        </SortSelect>
+        <SortSection>
+          <label>Sort By:</label>
+          <SortSelect value={sortOption} onChange={handleSortChange}>
+            <option value="Featured">Featured</option>
+            <option value="Price, low to high">Price, low to high</option>
+            <option value="Price, high to low">Price, high to low</option>
+            <option value="A to Z">A to Z</option>
+            <option value="Z to A">Z to A</option>
+            <option value="Newest arrivals">Newest arrivals</option>
+          </SortSelect>
+        </SortSection>
       </FilterSortWrapper>
       <GridWrapper>
-        <AdventureAL />
-        <CityStep3Speed />
-        <Coaster />
-        <UrbanCommuterBike />
-        <CityClassic3speed />
-        <CityClassic8speed />
-        <CityStepThrough8Speed />
-        <PureCycleOriginal />
-        <CityStepThrough268Speed />
-        <CityStepThrough263Speed />
-     
+        {sortedData.length > 0 ? (
+          sortedData.map((product) => (
+            <ProductCard key={product.id} {...product} />
+          ))
+        ) : (
+          <NoResultsMessage>No bikes available for the selected filters.</NoResultsMessage>
+        )}
       </GridWrapper>
     </SectionWrapper>
   );
@@ -62,6 +143,7 @@ const FilterSortWrapper = styled.div`
 `;
 
 const FilterButton = styled.button`
+  position: relative;
   display: flex;
   align-items: center;
   padding: 0.5rem 1rem;
@@ -74,8 +156,48 @@ const FilterButton = styled.button`
   }
 `;
 
-const SortSelect = styled.select`
+const DropdownMenu = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+`;
+
+const DropdownItem = styled.div`
   padding: 0.5rem 1rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+`;
+
+const SelectFilter = styled.select`
+  margin-left: 0.5rem;
+  padding: 0.25rem;
+  border: 1px solid #ccc;
+  background-color: #ffffff;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+`;
+
+const SortSection = styled.div`
+  display: flex;
+  align-items: center;
+
+  label {
+    margin-right: 0.5rem;
+  }
+`;
+
+const SortSelect = styled.select`
+  padding: 0.25rem;
   border: 1px solid #ccc;
   background-color: #ffffff;
   cursor: pointer;
@@ -103,6 +225,12 @@ const GridWrapper = styled.div`
     grid-template-columns: 1fr;
     gap: 1rem;
   }
+`;
+
+const NoResultsMessage = styled.div`
+  grid-column: span 3;
+  text-align: center;
+  color: #888;
 `;
 
 export default BikesSection;

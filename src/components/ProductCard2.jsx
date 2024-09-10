@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 const ProductCard = ({ id, image, altText, name, brand, price, oldPrice, isSoldOut, colors }) => {
   return (
     <div className="text-center">
-      <Link to={`/accessories/${id}`}>
+      <Link to={`/bikes/${id}`}>
         <img src={image} alt={altText} className="w-full max-w-xs mx-auto mb-4" />
         <h3 className="text-xl font-semibold">{name}</h3>
       </Link>

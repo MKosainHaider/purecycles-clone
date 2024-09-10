@@ -5,7 +5,7 @@ import Footer from '../../components/Footer';
 import AccessoriesSection from './AccessoriesSection';
 import HeroImage from '../../assets/Page-Images/AccessoriesImg1.webp';
 
-const AccessoriesPage = ({ products }) => {
+const AccessoriesPage = () => {
   return (
     <>
       <NavBar />
@@ -14,7 +14,7 @@ const AccessoriesPage = ({ products }) => {
           <h1 className="text-4xl font-bold text-white md:text-6xl">Bicycle Parts and Accessories</h1>
         </HeroContent>
       </HeroSection>
-      <AccessoriesSection products={products} />
+      <AccessoriesSection />
       <Footer />
     </>
   );
